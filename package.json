@@ -1,0 +1,24 @@
+{
+  "name": "wuavie",
+  "version": "0.1.0",
+  "description": "Show categories of movies, consuming a API REST",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PabloWually/wuavie.git"
+  },
+  "keywords": [
+    "API",
+    "JavaScript",
+    "movies"
+  ],
+  "author": "Pablo Guallichico",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/PabloWually/wuavie/issues"
+  },
+  "homepage": "https://github.com/PabloWually/wuavie#readme"
+}
