@@ -16,17 +16,7 @@ async function getTrendingMoviesPreview(){
     const movies = data.results;
     console.log(data, data.results);
 
-    movies.forEach(movie => {
-        const trendingMovieContainer = document.querySelector('#trendingPreview .trendingPreview-movieList')
-        const movieContainer = document.createElement('div');
-        movieContainer.classList.add('movie-container')
-        const  movieImg = document.createElement('img');
-        movieImg.classList.add('movie-img')
-        movieImg.setAttribute('alt', movie.title);
-        movieImg.setAttribute('src','https://image.tmdb.org/t/p/w300'+ movie.poster_path)
-        movieContainer.append(movieImg);
-        trendingMovieContainer.append(movieContainer);
-    });  
+    addImageMovies(trendingMoviesPreviewList, movies);
 }
 
 async function getCategoriesPreview(){
@@ -34,20 +24,68 @@ async function getCategoriesPreview(){
     const categories = data.genres;
     console.log(data);
 
+    createCategorie(categoriesPreviewList, categories); 
+}
+
+async function getMoviesByCategories(id){
+    const { data } = await api('/discover/movie', {
+        params: {
+            'with_genres': id
+        }
+    });
+    const movies = data.results;
+    console.log(data, data.results);    
+
+    addImageMovies(genericSection, movies); 
+}
+
+async function getMoviesBySearch(query){
+    const { data } = await api('/search/movie', {
+        params: {
+            query
+        }
+    });
+    const movies = data.results;
+    console.log(data, data.results);    
+
+    addImageMovies(genericSection, movies); 
+}
+
+function addImageMovies(container, movies){
+    container.innerHTML = '';
+    movies.forEach(movie => {
+        const movieContainer = document.createElement('div');
+        movieContainer.classList.add('movie-container')
+        const  movieImg = document.createElement('img');
+        movieImg.classList.add('movie-img')
+        movieImg.setAttribute('alt', movie.title);
+        movieImg.setAttribute('src','https://image.tmdb.org/t/p/w300'+ movie.poster_path)
+        movieContainer.append(movieImg);
+        container.append(movieContainer);
+    }); 
+}
+
+function createCategorie(container, categories){
+    container.innerHTML = '';
+    
     categories.forEach(category => {
-        const previewCategoriesContainer = document.querySelector('#categoriesPreview .categoriesPreview-list')
         const categoryContainer = document.createElement('div');
         categoryContainer.classList.add('category-container')
         const  categoryTitle = document.createElement('h3');
         categoryTitle.classList.add('category-title')
         categoryTitle.setAttribute('id', `id${category.id}`);
+        categoryTitle.addEventListener('click', () => location.hash = `#categories=${category.id}-${category.name}`)
         const categoryTitleText = document.createTextNode(category.name);
         categoryTitle.append(categoryTitleText);
         categoryContainer.append(categoryTitle);
-        previewCategoriesContainer.append(categoryContainer);
-    });  
+        container.append(categoryContainer);
+    });
 }
 
+async function getTrendingMovies(){
+    const { data } = await api('trending/movie/week')
+    const movies = data.results;
+    console.log(data, data.results);
 
-getTrendingMoviesPreview();
-getCategoriesPreview();
+    addImageMovies(genericSection, movies);
+}
