@@ -53,6 +53,7 @@ async function getMoviesBySearch(query){
 
 function addImageMovies(container, movies){
     container.innerHTML = '';
+    
     movies.forEach(movie => {
         const movieContainer = document.createElement('div');
         movieContainer.addEventListener('click', () => {
