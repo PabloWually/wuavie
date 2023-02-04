@@ -14,6 +14,7 @@ const api = axios.create({
 async function getTrendingMoviesPreview(){
     const { data } = await api('trending/movie/week')
     const movies = data.results;
+    maxPage = data.total_pages;
     console.log(data, data.results);
 
     addImageMovies(trendingMoviesPreviewList, movies);
@@ -34,9 +35,35 @@ async function getMoviesByCategories(id){
         }
     });
     const movies = data.results;
+    maxPage = data.total_pages;
     console.log(data, data.results);    
 
     addImageMovies(genericSection, movies); 
+}
+
+function getPaginatedMoviesByCategories(id){
+    return async function () {
+        const {
+            scrollTop,
+            scrollHeight,
+            clientHeight
+        } = document.documentElement
+    
+        const scrollIsBottom = clientHeight + scrollTop >= scrollHeight - 20;
+        const pageIsNotMax = page < maxPage;
+        
+        if (scrollIsBottom && pageIsNotMax){
+            page++;
+            const { data } = await api('/discover/movie', {
+                params: {
+                    'with_genres': id,
+                    page,
+                }
+            });
+            const movies = data.results;
+            addImageMovies(genericSection, movies, false); 
+        }
+    }
 }
 
 async function getMoviesBySearch(query){
@@ -46,14 +73,54 @@ async function getMoviesBySearch(query){
         }
     });
     const movies = data.results;
+    maxPage = data.total_pages;
     console.log(data, data.results);    
 
     addImageMovies(genericSection, movies); 
 }
 
-function addImageMovies(container, movies){
-    container.innerHTML = '';
+
+function getPaginatedMoviesBySearch(query){
+    return async function () {
+        const {
+            scrollTop,
+            scrollHeight,
+            clientHeight
+        } = document.documentElement
     
+        const scrollIsBottom = clientHeight + scrollTop >= scrollHeight - 20;
+        const pageIsNotMax = page < maxPage;
+        
+        if (scrollIsBottom && pageIsNotMax){
+            page++;
+            const { data } = await api('/search/movie', {
+                params: {
+					query,
+                    page: page,
+                },
+            });
+            const movies = data.results;
+            console.log(data, data.results);
+        
+            addImageMovies(genericSection, movies, false); 
+        }
+    }
+}
+
+const lazyLoader = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+        if(entry.isIntersecting){
+            const url = entry.target.getAttribute('data-img');
+            entry.target.setAttribute('src', url);
+        }
+    });
+});
+
+function addImageMovies(container, movies, clean = true){
+    if(clean){
+        container.innerHTML = '';
+    }
+
     movies.forEach(movie => {
         const movieContainer = document.createElement('div');
         movieContainer.addEventListener('click', () => {
@@ -61,9 +128,15 @@ function addImageMovies(container, movies){
         });
         movieContainer.classList.add('movie-container')
         const  movieImg = document.createElement('img');
-        movieImg.classList.add('movie-img')
+        movieImg.classList.add('movie-img');
         movieImg.setAttribute('alt', movie.title);
-        movieImg.setAttribute('src','https://image.tmdb.org/t/p/w300'+ movie.poster_path)
+        movieImg.setAttribute('data-img','https://image.tmdb.org/t/p/w300'+ movie.poster_path)
+        movieImg.addEventListener('error', () => {
+            movieImg.setAttribute('src', 'https://img.freepik.com/free-vector/oops-404-error-with-broken-robot-concept-illustration_114360-5529.jpg?w=2000');
+        });
+        
+        lazyLoader.observe(movieImg);
+        
         movieContainer.append(movieImg);
         container.append(movieContainer);
     }); 
@@ -86,10 +159,32 @@ function createCategorie(container, categories){
     });
 }
 
+async function getPaginatedTrendingMovies(){
+    const {
+        scrollTop,
+        scrollHeight,
+        clientHeight
+    } = document.documentElement
+
+    const scrollIsBottom = clientHeight + scrollTop >= scrollHeight - 20;
+    const pageIsNotMax = page < maxPage;
+    
+    if (scrollIsBottom && pageIsNotMax){
+        page++;
+        const { data } = await api('trending/movie/week',{
+            params: {
+                page: page
+            },
+        })
+        const movies = data.results;
+
+        addImageMovies(genericSection, movies, false);
+    }
+}
+
 async function getTrendingMovies(){
     const { data } = await api('trending/movie/week')
     const movies = data.results;
-    console.log(data, data.results);
 
     addImageMovies(genericSection, movies);
 }

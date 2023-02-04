@@ -104,6 +104,8 @@ button {
 
 .movie-container {
   cursor: pointer;
+  max-width: 400px;
+  margin: 0 auto;
 }
 
 .movie-container--loading{
@@ -129,6 +131,7 @@ button {
 
 .movie-img {
   border-radius: 8px;
+  min-height: 175px;
 }
 
 .categoriesPreview-list, .categories-list {

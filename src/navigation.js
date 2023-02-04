@@ -1,3 +1,7 @@
+let  page = 1;
+let InfiniteScroll;
+let maxPage;
+
 searchFormBtn.addEventListener('click', () => location.hash = `#search=${searchFormInput.value}`)
 trendingBtn.addEventListener('click', () => location.hash = '#trends');
 arrowBtn.addEventListener('click', () => {
@@ -7,9 +11,15 @@ arrowBtn.addEventListener('click', () => {
 
 window.addEventListener('DOMContentLoaded', navigator, false);
 window.addEventListener('hashchange', navigator, false);
+window.addEventListener('scroll', InfiniteScroll, false);
 
 function navigator() {
     console.log({ location });
+
+    if(InfiniteScroll){
+        window.removeEventListener('scroll', InfiniteScroll, { passive: false });
+        InfiniteScroll = undefined;
+    }
     
     if(location.hash.startsWith('#trends')){
         trendsPage();
@@ -22,7 +32,11 @@ function navigator() {
     } else {
         homePage();
     }
-    document.documentElement.scrollTop = 0
+    document.documentElement.scrollTop = 0;
+    console.log(InfiniteScroll)
+    if(InfiniteScroll){
+        window.addEventListener('scroll', InfiniteScroll, { passive: false });
+    }
 }
 
 function homePage(){
@@ -61,6 +75,8 @@ function trendsPage(){
 
     getTrendingMovies()
     headerCategoryTitle.textContent = 'Tendencias'
+
+    InfiniteScroll = getPaginatedTrendingMovies;
 }
 function moviesPage(){
 
@@ -99,6 +115,7 @@ function categoriesPage(){
     const [ idCategory, nameCategory] = categoryData.split('-');
     getMoviesByCategories(idCategory);
     headerCategoryTitle.textContent = nameCategory;
+    InfiniteScroll = getPaginatedMoviesByCategories(idCategory);
 }
 function searchPage(){
     console.log('search')
@@ -117,4 +134,5 @@ function searchPage(){
 
     const [ _, queryValue] = location.hash.split('=');
     getMoviesBySearch(queryValue);
+    InfiniteScroll = getPaginatedMoviesBySearch(queryValue);
 }
