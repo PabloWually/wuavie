@@ -11,6 +11,30 @@ const api = axios.create({
     }
 });
 
+function likedMoviesList(){
+    const item = JSON.parse(localStorage.getItem('liked-movies'));
+    let movies;
+
+    if(item) {
+        movies = item;
+    } else {
+        movies = {};
+    }
+    return movies;
+}
+
+function likeMovie(movie){
+    const likedMovies = likedMoviesList();
+
+    if(likedMovies[movie.id]){
+        likedMovies[movie.id] = undefined;
+    } else{
+        likedMovies[movie.id] = movie;
+    }
+
+    localStorage.setItem('liked-movies', JSON.stringify(likedMovies))
+}
+
 async function getTrendingMoviesPreview(){
     const { data } = await api('trending/movie/week')
     const movies = data.results;
@@ -116,6 +140,13 @@ const lazyLoader = new IntersectionObserver((entries) => {
     });
 });
 
+function getLikedMovies(){
+    const likedMovies = likedMoviesList();
+    const arrayMoives = Object.values(likedMovies);
+
+    addImageMovies(likedMoviesListArticle, arrayMoives, true);
+}
+
 function addImageMovies(container, movies, clean = true){
     if(clean){
         container.innerHTML = '';
@@ -123,21 +154,33 @@ function addImageMovies(container, movies, clean = true){
 
     movies.forEach(movie => {
         const movieContainer = document.createElement('div');
-        movieContainer.addEventListener('click', () => {
-            location.hash = `movie=${movie.id}`
-        });
+        // movieContainer.addEventListener('click', () => {
+        //     location.hash = `movie=${movie.id}`
+        // });
         movieContainer.classList.add('movie-container')
         const  movieImg = document.createElement('img');
+        movieImg.addEventListener('click', () => {
+            location.hash = `movie=${movie.id}`
+        });
         movieImg.classList.add('movie-img');
         movieImg.setAttribute('alt', movie.title);
         movieImg.setAttribute('data-img','https://image.tmdb.org/t/p/w300'+ movie.poster_path)
         movieImg.addEventListener('error', () => {
             movieImg.setAttribute('src', 'https://img.freepik.com/free-vector/oops-404-error-with-broken-robot-concept-illustration_114360-5529.jpg?w=2000');
         });
+
+        const movieButton = document.createElement('button');
+        movieButton.classList.add('movie-btn');
+        likedMoviesList()[movie.id] && movieButton.classList.add('movie-btn--liked');
+        movieButton.addEventListener('click', () => {
+            movieButton.classList.toggle('movie-btn--liked');
+            likeMovie(movie);
+        });
         
         lazyLoader.observe(movieImg);
         
         movieContainer.append(movieImg);
+        movieContainer.append(movieButton);
         container.append(movieContainer);
     }); 
 }
